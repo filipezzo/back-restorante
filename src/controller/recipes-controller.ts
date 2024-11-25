@@ -66,6 +66,27 @@ class RecipesController {
     });
     return response.status(204).send();
   }
+
+  async recipe(request: Request, response: Response) {
+    const userId = request.user?.id;
+    const { id } = request.params;
+
+    if (!userId) {
+      return response.status(401).json({ message: "Usuário não autenticado." });
+    }
+
+    const recipe = await prisma.recipe.findUnique({ where: { id } });
+
+    if (!recipe) {
+      return response.status(404).json({ message: "Receita não encontrada." });
+    }
+
+    if (recipe.userId !== userId) {
+      return response.status(403).json({ message: "Acesso negado." });
+    }
+
+    return response.json(recipe);
+  }
 }
 
 export { RecipesController };
